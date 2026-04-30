@@ -172,8 +172,9 @@
   .token-steps{font-size:0.72rem;color:var(--muted);line-height:2;margin-bottom:1.5rem;padding-left:1rem;}
   .token-steps li{list-style:decimal;}
 
-  .drag-handle{cursor:grab;color:var(--muted);font-size:1rem;padding:0 0.25rem;}
-  .drag-handle:active{cursor:grabbing;}
+  .video-item.drag-over{border-color:var(--gold);background:rgba(201,168,76,0.05);}
+  .drag-handle{cursor:grab;color:var(--muted);font-size:1.1rem;padding:0 0.25rem;user-select:none;}
+  .drag-handle:active{cursor:grabbing;color:var(--gold);}
 
   .preview-link{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
   .preview-link:hover{color:var(--gold);}
@@ -623,6 +624,7 @@
       const item = document.createElement('div');
       item.className = 'video-item';
       item.dataset.index = i;
+      item.draggable = true;
       item.innerHTML = `
         <img class="video-thumb-sm" src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" onerror="this.src=''" alt=""/>
         <div class="video-info-sm">
@@ -630,10 +632,41 @@
           <div class="vmeta">${v.id} · ${v.duration}</div>
         </div>
         <div class="video-actions">
+          <span class="drag-handle" title="Drag to reorder">⠿</span>
           <button class="btn btn-outline btn-sm edit-video-btn" data-i="${i}">Edit</button>
           <button class="btn btn-danger btn-sm delete-video-btn" data-i="${i}">✕</button>
         </div>`;
       list.appendChild(item);
+    });
+
+    // ── DRAG AND DROP ──
+    let dragSrc = null;
+    list.querySelectorAll('.video-item').forEach(item => {
+      item.addEventListener('dragstart', e => {
+        dragSrc = item;
+        setTimeout(() => item.style.opacity = '0.4', 0);
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      item.addEventListener('dragend', () => {
+        item.style.opacity = '1';
+        list.querySelectorAll('.video-item').forEach(i => i.classList.remove('drag-over'));
+      });
+      item.addEventListener('dragover', e => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        list.querySelectorAll('.video-item').forEach(i => i.classList.remove('drag-over'));
+        if (item !== dragSrc) item.classList.add('drag-over');
+      });
+      item.addEventListener('drop', e => {
+        e.preventDefault();
+        if (dragSrc === item) return;
+        const fromIdx = parseInt(dragSrc.dataset.index);
+        const toIdx   = parseInt(item.dataset.index);
+        const moved = siteData.videos.splice(fromIdx, 1)[0];
+        siteData.videos.splice(toIdx, 0, moved);
+        renderVideoList();
+        markDirty();
+      });
     });
 
     document.querySelectorAll('.delete-video-btn').forEach(btn => {
@@ -788,4 +821,3 @@
 </script>
 </body>
 </html>
-
