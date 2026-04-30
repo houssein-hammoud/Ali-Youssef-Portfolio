@@ -1,0 +1,95 @@
+{
+  "hero": {
+    "name": "Ali Youssef",
+    "tagline": "Cinematic Video Editor",
+    "subtitle": "Crafting visual stories that resonate — from commercial campaigns to narrative films.",
+    "reelVideoId": "ZlNFpri-Y40"
+  },
+  "about": {
+    "heading": "Telling stories through the edit.",
+    "bio1": "Ali Youssef is a Beirut-based video editor with a decade of experience crafting cinematic narratives for brands, directors, and artists across the Middle East and Europe.",
+    "bio2": "His approach blends precise rhythm, emotional pacing, and an obsession with color — transforming raw footage into stories that linger.",
+    "tools": ["Premiere Pro", "After Effects", "DaVinci Resolve", "Audition", "Cinema 4D"],
+    "stats": [
+      { "num": "10+", "label": "Years of experience" },
+      { "num": "80+", "label": "Projects completed" },
+      { "num": "30+", "label": "Brand clients" },
+      { "num": "12", "label": "Awards & nominations" }
+    ]
+  },
+  "contact": {
+    "email": "ali@aliyoussef.com",
+    "location": "Beirut, Lebanon",
+    "socials": [
+      { "label": "Instagram", "url": "#" },
+      { "label": "Vimeo", "url": "#" },
+      { "label": "LinkedIn", "url": "#" },
+      { "label": "YouTube", "url": "#" }
+    ]
+  },
+  "videos": [
+    {
+      "id": "dQw4w9WgXcQ",
+      "title": "Pulse — Luxury Automotive Campaign",
+      "desc": "A high-octane commercial for a leading automotive brand.",
+      "cat": "commercial",
+      "duration": "1:42"
+    },
+    {
+      "id": "ZlNFpri-Y40",
+      "title": "Echoes of the Mountain",
+      "desc": "Feature documentary exploring remote communities in northern Lebanon.",
+      "cat": "documentary",
+      "duration": "24:10"
+    },
+    {
+      "id": "9bZkp7q19f0",
+      "title": "Golden Hour — Official Music Video",
+      "desc": "Directed and edited for rising indie artist, shot in one continuous golden hour.",
+      "cat": "music",
+      "duration": "3:55"
+    },
+    {
+      "id": "kJQP7kiw5Fk",
+      "title": "The Last Train",
+      "desc": "Short narrative film exploring themes of memory and departure.",
+      "cat": "narrative",
+      "duration": "12:30"
+    },
+    {
+      "id": "RgKAFK5djSk",
+      "title": "Bloom — Fragrance Campaign",
+      "desc": "Soft, sensory-driven campaign for a French perfume house.",
+      "cat": "commercial",
+      "duration": "0:60"
+    },
+    {
+      "id": "JGwWNGJdvx8",
+      "title": "Between Tides",
+      "desc": "A poetic documentary portrait of fishermen along the Lebanese coast.",
+      "cat": "documentary",
+      "duration": "18:44"
+    },
+    {
+      "id": "OPf0YbXqDm0",
+      "title": "Shattered — Music Video",
+      "desc": "Conceptual performance piece with in-camera visual effects.",
+      "cat": "music",
+      "duration": "4:22"
+    },
+    {
+      "id": "YqeW9_5kURI",
+      "title": "The Room on the Third Floor",
+      "desc": "Award-winning short film selected at Beirut International Film Festival.",
+      "cat": "narrative",
+      "duration": "9:15"
+    },
+    {
+      "id": "fJ9rUzIMcZQ",
+      "title": "Rise — Athletic Brand Film",
+      "desc": "Motivational brand film for a regional sports apparel launch.",
+      "cat": "commercial",
+      "duration": "2:10"
+    }
+  ]
+}

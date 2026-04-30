@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Ali Youssef Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --gold:#c9a84c; --ink:#0a0a0a; --surface:#141414; --card:#1c1c1c;
+    --border:rgba(201,168,76,0.18); --border-hover:rgba(201,168,76,0.5);
+    --cream:#f0ece2; --muted:rgba(240,236,226,0.45); --danger:#e05252;
+    --success:#52c27a; --input-bg:#111;
+  }
+  body{background:var(--ink);color:var(--cream);font-family:'DM Sans',sans-serif;font-weight:300;min-height:100vh;}
+
+  /* ── LOGIN ── */
+  .login-screen{
+    position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;
+    justify-content:center;z-index:999;transition:opacity 0.5s;
+  }
+  .login-screen.hidden{opacity:0;pointer-events:none;}
+  .login-box{
+    width:360px;padding:3rem;
+    border:1px solid var(--border);background:var(--surface);
+  }
+  .login-logo{font-family:'Bebas Neue',sans-serif;font-size:2rem;letter-spacing:0.15em;color:var(--cream);margin-bottom:0.25rem;}
+  .login-logo span{color:var(--gold);}
+  .login-sub{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:2.5rem;}
+  .login-label{font-size:0.65rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:0.5rem;}
+  .login-input{
+    width:100%;background:var(--input-bg);border:1px solid var(--border);
+    color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.9rem;
+    padding:0.75rem 1rem;outline:none;transition:border-color 0.3s;margin-bottom:1.5rem;
+  }
+  .login-input:focus{border-color:var(--gold);}
+  .login-btn{
+    width:100%;background:var(--gold);border:none;color:var(--ink);
+    font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:500;
+    letter-spacing:0.2em;text-transform:uppercase;padding:0.85rem;
+    cursor:pointer;transition:opacity 0.2s;
+  }
+  .login-btn:hover{opacity:0.85;}
+  .login-error{font-size:0.75rem;color:var(--danger);margin-top:1rem;display:none;text-align:center;}
+
+  /* ── ADMIN LAYOUT ── */
+  .admin-layout{display:none;min-height:100vh;}
+  .admin-layout.visible{display:flex;}
+
+  /* Sidebar */
+  .sidebar{
+    width:220px;background:var(--surface);border-right:1px solid var(--border);
+    display:flex;flex-direction:column;padding:2rem 0;flex-shrink:0;position:sticky;top:0;height:100vh;
+  }
+  .sidebar-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:0.12em;color:var(--cream);padding:0 1.5rem;margin-bottom:0.3rem;}
+  .sidebar-logo span{color:var(--gold);}
+  .sidebar-role{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);padding:0 1.5rem;margin-bottom:2rem;}
+  .nav-item{
+    display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1.5rem;
+    font-size:0.78rem;letter-spacing:0.08em;color:var(--muted);cursor:pointer;
+    transition:all 0.2s;border-left:2px solid transparent;
+  }
+  .nav-item:hover{color:var(--cream);background:rgba(255,255,255,0.03);}
+  .nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,0.05);}
+  .nav-icon{font-size:1rem;width:18px;text-align:center;}
+  .sidebar-bottom{margin-top:auto;padding:0 1.5rem;}
+  .logout-btn{
+    width:100%;background:transparent;border:1px solid var(--border);
+    color:var(--muted);font-family:'DM Sans',sans-serif;font-size:0.65rem;
+    letter-spacing:0.2em;text-transform:uppercase;padding:0.6rem;
+    cursor:pointer;transition:all 0.2s;
+  }
+  .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+  /* Main */
+  .main-content{flex:1;padding:3rem;overflow-y:auto;}
+  .page-header{margin-bottom:2.5rem;}
+  .page-label{font-size:0.62rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;}
+  .page-title{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:0.08em;color:var(--cream);}
+
+  /* Panels */
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* Cards */
+  .card{background:var(--card);border:1px solid var(--border);padding:1.5rem 2rem;margin-bottom:1.5rem;}
+  .card-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+  .card-heading{font-size:0.65rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);}
+
+  /* Form elements */
+  .field{margin-bottom:1.2rem;}
+  .field label{display:block;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);margin-bottom:0.45rem;}
+  .field input,.field textarea,.field select{
+    width:100%;background:var(--input-bg);border:1px solid var(--border);
+    color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.85rem;
+    padding:0.65rem 0.9rem;outline:none;transition:border-color 0.3s;
+    resize:vertical;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold);}
+  .field select option{background:var(--input-bg);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+  .field-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.4rem;font-family:'DM Sans',sans-serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;border:none;}
+  .btn-gold{background:var(--gold);color:var(--ink);}
+  .btn-gold:hover{opacity:0.85;}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+  .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+  .btn-danger{background:transparent;border:1px solid rgba(224,82,82,0.3);color:var(--danger);}
+  .btn-danger:hover{background:rgba(224,82,82,0.1);}
+  .btn-sm{padding:0.4rem 0.9rem;font-size:0.62rem;}
+
+  /* Video list */
+  .video-list{display:flex;flex-direction:column;gap:0.75rem;}
+  .video-item{
+    background:var(--input-bg);border:1px solid var(--border);
+    display:grid;grid-template-columns:80px 1fr auto;gap:1rem;align-items:center;padding:0.85rem 1rem;
+    transition:border-color 0.2s;
+  }
+  .video-item:hover{border-color:var(--border-hover);}
+  .video-thumb-sm{width:80px;height:45px;object-fit:cover;display:block;filter:brightness(0.8);}
+  .video-info-sm .vtitle{font-size:0.82rem;color:var(--cream);margin-bottom:0.2rem;}
+  .video-info-sm .vmeta{font-size:0.65rem;color:var(--muted);letter-spacing:0.05em;}
+  .cat-badge{display:inline-block;font-size:0.55rem;letter-spacing:0.15em;text-transform:uppercase;background:rgba(201,168,76,0.12);color:var(--gold);padding:0.15rem 0.5rem;margin-left:0.5rem;}
+  .video-actions{display:flex;gap:0.5rem;align-items:center;}
+
+  /* Add video form */
+  .add-video-form{background:var(--input-bg);border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;display:none;}
+  .add-video-form.open{display:block;}
+  .form-title{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:1.2rem;}
+
+  /* Tools */
+  .tools-editor{display:flex;flex-wrap:wrap;gap:0.5rem;margin-top:0.5rem;}
+  .tool-chip{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(201,168,76,0.1);border:1px solid var(--border);color:var(--gold);font-size:0.65rem;letter-spacing:0.12em;padding:0.3rem 0.7rem;}
+  .tool-chip button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:0.8rem;line-height:1;padding:0;}
+  .tool-chip button:hover{color:var(--danger);}
+  .tool-add-row{display:flex;gap:0.5rem;margin-top:0.75rem;}
+  .tool-add-row input{flex:1;}
+
+  /* Stats editor */
+  .stats-grid-edit{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+  .stat-edit-item{background:var(--input-bg);border:1px solid var(--border);padding:0.75rem;}
+  .stat-edit-item input{width:100%;background:transparent;border:none;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:0.82rem;outline:none;padding:0.2rem 0;}
+  .stat-edit-item input:first-child{font-size:1.1rem;font-weight:500;color:var(--gold);border-bottom:1px solid var(--border);padding-bottom:0.4rem;margin-bottom:0.4rem;}
+
+  /* Socials */
+  .social-item{display:grid;grid-template-columns:120px 1fr;gap:0.75rem;margin-bottom:0.75rem;align-items:center;}
+  .social-label{font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);}
+
+  /* Save bar */
+  .save-bar{
+    position:fixed;bottom:2rem;right:3rem;z-index:200;
+    display:flex;align-items:center;gap:1rem;
+    background:var(--surface);border:1px solid var(--border);padding:1rem 1.5rem;
+    opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;
+  }
+  .save-bar.visible{opacity:1;transform:none;pointer-events:all;}
+  .save-status{font-size:0.7rem;letter-spacing:0.12em;color:var(--muted);}
+  .save-status.saving{color:var(--gold);}
+  .save-status.saved{color:var(--success);}
+  .save-status.error{color:var(--danger);}
+
+  /* Token modal */
+  .token-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:800;display:flex;align-items:center;justify-content:center;display:none;}
+  .token-modal.open{display:flex;}
+  .token-box{width:440px;background:var(--surface);border:1px solid var(--border);padding:2.5rem;}
+  .token-box h3{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:0.1em;margin-bottom:0.5rem;}
+  .token-box p{font-size:0.78rem;color:var(--muted);line-height:1.8;margin-bottom:1.5rem;}
+  .token-box a{color:var(--gold);}
+  .token-steps{font-size:0.72rem;color:var(--muted);line-height:2;margin-bottom:1.5rem;padding-left:1rem;}
+  .token-steps li{list-style:decimal;}
+
+  .drag-handle{cursor:grab;color:var(--muted);font-size:1rem;padding:0 0.25rem;}
+  .drag-handle:active{cursor:grabbing;}
+
+  .preview-link{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color 0.2s;}
+  .preview-link:hover{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo"><span>A</span>Y</div>
+    <div class="login-sub">Portfolio Admin</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="loginInput" placeholder="Enter admin password" autocomplete="current-password"/>
+    <button class="login-btn" id="loginBtn">Enter</button>
+    <div class="login-error" id="loginError">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- TOKEN SETUP MODAL -->
+<div class="token-modal" id="tokenModal">
+  <div class="token-box">
+    <h3>GitHub Token Required</h3>
+    <p>To save changes to the live site, paste your GitHub Personal Access Token below. This is stored only in your browser session.</p>
+    <ol class="token-steps">
+      <li>Go to <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a></li>
+      <li>Note: "Ali Youssef Portfolio"</li>
+      <li>Select scope: <strong>repo</strong></li>
+      <li>Click "Generate token" and copy it</li>
+    </ol>
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="tokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"/>
+    </div>
+    <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+      <button class="btn btn-gold" id="saveTokenBtn">Save Token</button>
+      <button class="btn btn-outline" id="cancelTokenBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-layout" id="adminLayout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo"><span>A</span>Y</div>
+    <div class="sidebar-role">Admin Panel</div>
+    <nav>
+      <div class="nav-item active" data-panel="videos">
+        <span class="nav-icon">▶</span> Videos
+      </div>
+      <div class="nav-item" data-panel="hero">
+        <span class="nav-icon">◈</span> Hero Section
+      </div>
+      <div class="nav-item" data-panel="about">
+        <span class="nav-icon">◉</span> About
+      </div>
+      <div class="nav-item" data-panel="contact">
+        <span class="nav-icon">◎</span> Contact
+      </div>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="preview-link" href="index.html" target="_blank">↗ View Live Site</a>
+      <br/><br/>
+      <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+
+    <!-- VIDEOS PANEL -->
+    <div class="panel active" id="panel-videos">
+      <div class="page-header">
+        <div class="page-label">Manage</div>
+        <div class="page-title">Videos</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <span class="card-heading">Video Library</span>
+          <button class="btn btn-gold btn-sm" id="toggleAddForm">+ Add Video</button>
+        </div>
+
+        <!-- Add form -->
+        <div class="add-video-form" id="addVideoForm">
+          <div class="form-title">New Video</div>
+          <div class="field-row">
+            <div class="field">
+              <label>YouTube Video ID</label>
+              <input type="text" id="newVideoId" placeholder="e.g. dQw4w9WgXcQ"/>
+            </div>
+            <div class="field">
+              <label>Duration</label>
+              <input type="text" id="newVideoDur" placeholder="e.g. 2:34"/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Title</label>
+            <input type="text" id="newVideoTitle" placeholder="Video title"/>
+          </div>
+          <div class="field">
+            <label>Description</label>
+            <textarea id="newVideoDesc" rows="2" placeholder="Short description"></textarea>
+          </div>
+          <div class="field">
+            <label>Category</label>
+            <select id="newVideoCat">
+              <option value="commercial">Commercial</option>
+              <option value="documentary">Documentary</option>
+              <option value="music">Music Video</option>
+              <option value="narrative">Narrative</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="btn btn-gold btn-sm" id="addVideoBtn">Add Video</button>
+            <button class="btn btn-outline btn-sm" id="cancelAddBtn">Cancel</button>
+          </div>
+        </div>
+
+        <div class="video-list" id="videoList"></div>
+      </div>
+    </div>
+
+    <!-- HERO PANEL -->
+    <div class="panel" id="panel-hero">
+      <div class="page-header">
+        <div class="page-label">Edit</div>
+        <div class="page-title">Hero Section</div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Hero Content</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>Full Name</label>
+            <input type="text" id="heroName"/>
+          </div>
+          <div class="field">
+            <label>Tagline (under name)</label>
+            <input type="text" id="heroTagline"/>
+          </div>
+        </div>
+        <div class="field">
+          <label>Subtitle text</label>
+          <textarea id="heroSubtitle" rows="2"></textarea>
+        </div>
+        <div class="field">
+          <label>Background Reel — YouTube Video ID</label>
+          <input type="text" id="heroReelId" placeholder="e.g. ZlNFpri-Y40"/>
+        </div>
+        <div id="reelPreview" style="margin-top:0.75rem;font-size:0.7rem;color:var(--muted);"></div>
+      </div>
+    </div>
+
+    <!-- ABOUT PANEL -->
+    <div class="panel" id="panel-about">
+      <div class="page-header">
+        <div class="page-label">Edit</div>
+        <div class="page-title">About Section</div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Bio</span></div>
+        <div class="field">
+          <label>Section Heading</label>
+          <input type="text" id="aboutHeading"/>
+        </div>
+        <div class="field">
+          <label>Bio — Paragraph 1</label>
+          <textarea id="aboutBio1" rows="3"></textarea>
+        </div>
+        <div class="field">
+          <label>Bio — Paragraph 2</label>
+          <textarea id="aboutBio2" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Tools</span></div>
+        <div class="tools-editor" id="toolsEditor"></div>
+        <div class="tool-add-row">
+          <input class="field input" type="text" id="newToolInput" placeholder="Add a tool..."/>
+          <button class="btn btn-outline btn-sm" id="addToolBtn">+ Add</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Stats</span></div>
+        <div class="stats-grid-edit" id="statsEditor"></div>
+      </div>
+    </div>
+
+    <!-- CONTACT PANEL -->
+    <div class="panel" id="panel-contact">
+      <div class="page-header">
+        <div class="page-label">Edit</div>
+        <div class="page-title">Contact Info</div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Details</span></div>
+        <div class="field-row">
+          <div class="field">
+            <label>Email Address</label>
+            <input type="email" id="contactEmail"/>
+          </div>
+          <div class="field">
+            <label>Location</label>
+            <input type="text" id="contactLocation"/>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title-row"><span class="card-heading">Social Links</span></div>
+        <div id="socialsEditor"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar" id="saveBar">
+  <span class="save-status" id="saveStatus">Unsaved changes</span>
+  <button class="btn btn-gold btn-sm" id="saveBtn">Save & Publish</button>
+</div>
+
+<script>
+  // ── CONFIG ──
+  const REPO_OWNER = 'houssein-hammoud';
+  const REPO_NAME  = 'Ali-Youssef-Portfolio';
+  const FILE_PATH  = 'videos.json';
+  const BRANCH     = 'main';
+  const ADMIN_PASS = 'PasswordAli123';
+
+  // ── STATE ──
+  let siteData = null;
+  let githubToken = sessionStorage.getItem('gh_token') || '';
+  let dirty = false;
+
+  // ── LOGIN ──
+  const loginScreen = document.getElementById('loginScreen');
+  const adminLayout  = document.getElementById('adminLayout');
+
+  function checkLogin() {
+    if (sessionStorage.getItem('admin_auth') === 'true') showAdmin();
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+  document.getElementById('loginInput').addEventListener('keydown', e => { if (e.key === 'Enter') attemptLogin(); });
+
+  function attemptLogin() {
+    const val = document.getElementById('loginInput').value;
+    if (val === ADMIN_PASS) {
+      sessionStorage.setItem('admin_auth', 'true');
+      showAdmin();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+      document.getElementById('loginInput').value = '';
+    }
+  }
+
+  function showAdmin() {
+    loginScreen.classList.add('hidden');
+    adminLayout.classList.add('visible');
+    loadFromGitHub();
+  }
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    sessionStorage.removeItem('admin_auth');
+    location.reload();
+  });
+
+  // ── GITHUB LOAD ──
+  async function loadFromGitHub() {
+    try {
+      const url = `https://raw.githubusercontent.com/${REPO_OWNER}/${REPO_NAME}/${BRANCH}/${FILE_PATH}?t=${Date.now()}`;
+      const res = await fetch(url);
+      siteData = await res.json();
+      populateForms();
+    } catch(e) {
+      alert('Could not load data from GitHub. Make sure the repo is public and videos.json exists.');
+    }
+  }
+
+  // ── TOKEN MODAL ──
+  const tokenModal = document.getElementById('tokenModal');
+  document.getElementById('saveTokenBtn').addEventListener('click', () => {
+    const t = document.getElementById('tokenInput').value.trim();
+    if (t) { githubToken = t; sessionStorage.setItem('gh_token', t); tokenModal.classList.remove('open'); saveToGitHub(); }
+  });
+  document.getElementById('cancelTokenBtn').addEventListener('click', () => tokenModal.classList.remove('open'));
+
+  // ── GITHUB SAVE ──
+  async function saveToGitHub() {
+    if (!githubToken) { tokenModal.classList.add('open'); return; }
+    setStatus('saving', 'Publishing...');
+    try {
+      // Get current SHA
+      const metaRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+        headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      const meta = await metaRes.json();
+      const sha = meta.sha;
+
+      const content = btoa(unescape(encodeURIComponent(JSON.stringify(siteData, null, 2))));
+      const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Update site content via admin panel', content, sha, branch: BRANCH })
+      });
+
+      if (putRes.ok) {
+        setStatus('saved', '✓ Published! Live in ~30s');
+        dirty = false;
+        hideSaveBar();
+      } else {
+        const err = await putRes.json();
+        if (putRes.status === 401) { githubToken = ''; sessionStorage.removeItem('gh_token'); tokenModal.classList.add('open'); }
+        else setStatus('error', 'Error: ' + (err.message || 'Unknown'));
+      }
+    } catch(e) {
+      setStatus('error', 'Save failed. Check token & network.');
+    }
+  }
+
+  function setStatus(type, msg) {
+    const el = document.getElementById('saveStatus');
+    el.textContent = msg;
+    el.className = 'save-status ' + type;
+  }
+
+  document.getElementById('saveBtn').addEventListener('click', () => {
+    collectAllForms();
+    saveToGitHub();
+  });
+
+  // ── SAVE BAR ──
+  function showSaveBar() { document.getElementById('saveBar').classList.add('visible'); }
+  function hideSaveBar() { setTimeout(() => document.getElementById('saveBar').classList.remove('visible'), 2500); }
+  function markDirty() { if (!dirty) { dirty = true; showSaveBar(); setStatus('', 'Unsaved changes'); } }
+
+  // ── NAV ──
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      item.classList.add('active');
+      document.getElementById('panel-' + item.dataset.panel).classList.add('active');
+    });
+  });
+
+  // ── POPULATE FORMS ──
+  function populateForms() {
+    if (!siteData) return;
+    // Hero
+    document.getElementById('heroName').value     = siteData.hero.name;
+    document.getElementById('heroTagline').value  = siteData.hero.tagline;
+    document.getElementById('heroSubtitle').value = siteData.hero.subtitle;
+    document.getElementById('heroReelId').value   = siteData.hero.reelVideoId;
+    updateReelPreview(siteData.hero.reelVideoId);
+
+    // About
+    document.getElementById('aboutHeading').value = siteData.about.heading;
+    document.getElementById('aboutBio1').value    = siteData.about.bio1;
+    document.getElementById('aboutBio2').value    = siteData.about.bio2;
+    renderTools();
+    renderStats();
+
+    // Contact
+    document.getElementById('contactEmail').value    = siteData.contact.email;
+    document.getElementById('contactLocation').value = siteData.contact.location;
+    renderSocials();
+
+    // Videos
+    renderVideoList();
+
+    // Attach change listeners
+    attachChangeListeners();
+  }
+
+  function attachChangeListeners() {
+    const inputs = document.querySelectorAll('.main-content input, .main-content textarea, .main-content select');
+    inputs.forEach(el => el.addEventListener('input', markDirty));
+  }
+
+  // ── COLLECT ALL ──
+  function collectAllForms() {
+    siteData.hero.name        = document.getElementById('heroName').value;
+    siteData.hero.tagline     = document.getElementById('heroTagline').value;
+    siteData.hero.subtitle    = document.getElementById('heroSubtitle').value;
+    siteData.hero.reelVideoId = document.getElementById('heroReelId').value.trim();
+    siteData.about.heading    = document.getElementById('aboutHeading').value;
+    siteData.about.bio1       = document.getElementById('aboutBio1').value;
+    siteData.about.bio2       = document.getElementById('aboutBio2').value;
+    siteData.contact.email    = document.getElementById('contactEmail').value;
+    siteData.contact.location = document.getElementById('contactLocation').value;
+    collectStats();
+    collectSocials();
+  }
+
+  // ── REEL PREVIEW ──
+  document.getElementById('heroReelId').addEventListener('input', e => {
+    updateReelPreview(e.target.value.trim());
+    markDirty();
+  });
+  function updateReelPreview(id) {
+    const el = document.getElementById('reelPreview');
+    if (id) el.innerHTML = `Preview thumbnail: <img src="https://img.youtube.com/vi/${id}/mqdefault.jpg" style="display:block;margin-top:0.5rem;height:80px;border:1px solid var(--border);" onerror="this.style.display='none'"/>`;
+    else el.innerHTML = '';
+  }
+
+  // ── VIDEOS ──
+  const catLabels = { commercial:'Commercial', documentary:'Documentary', music:'Music Video', narrative:'Narrative' };
+
+  function renderVideoList() {
+    const list = document.getElementById('videoList');
+    list.innerHTML = '';
+    siteData.videos.forEach((v, i) => {
+      const item = document.createElement('div');
+      item.className = 'video-item';
+      item.dataset.index = i;
+      item.innerHTML = `
+        <img class="video-thumb-sm" src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" onerror="this.src=''" alt=""/>
+        <div class="video-info-sm">
+          <div class="vtitle">${v.title} <span class="cat-badge">${catLabels[v.cat]||v.cat}</span></div>
+          <div class="vmeta">${v.id} · ${v.duration}</div>
+        </div>
+        <div class="video-actions">
+          <button class="btn btn-outline btn-sm edit-video-btn" data-i="${i}">Edit</button>
+          <button class="btn btn-danger btn-sm delete-video-btn" data-i="${i}">✕</button>
+        </div>`;
+      list.appendChild(item);
+    });
+
+    document.querySelectorAll('.delete-video-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i);
+        if (confirm(`Remove "${siteData.videos[i].title}"?`)) {
+          siteData.videos.splice(i, 1);
+          renderVideoList();
+          markDirty();
+        }
+      });
+    });
+
+    document.querySelectorAll('.edit-video-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const i = parseInt(btn.dataset.i);
+        const v = siteData.videos[i];
+        document.getElementById('newVideoId').value    = v.id;
+        document.getElementById('newVideoTitle').value = v.title;
+        document.getElementById('newVideoDesc').value  = v.desc;
+        document.getElementById('newVideoDur').value   = v.duration;
+        document.getElementById('newVideoCat').value   = v.cat;
+        document.getElementById('addVideoBtn').textContent = 'Update Video';
+        document.getElementById('addVideoBtn').dataset.editIndex = i;
+        document.getElementById('addVideoForm').classList.add('open');
+        document.getElementById('toggleAddForm').textContent = '− Cancel';
+      });
+    });
+  }
+
+  document.getElementById('toggleAddForm').addEventListener('click', () => {
+    const form = document.getElementById('addVideoForm');
+    const open = form.classList.toggle('open');
+    document.getElementById('toggleAddForm').textContent = open ? '− Cancel' : '+ Add Video';
+    if (!open) resetAddForm();
+  });
+  document.getElementById('cancelAddBtn').addEventListener('click', () => {
+    document.getElementById('addVideoForm').classList.remove('open');
+    document.getElementById('toggleAddForm').textContent = '+ Add Video';
+    resetAddForm();
+  });
+
+  function resetAddForm() {
+    ['newVideoId','newVideoTitle','newVideoDesc','newVideoDur'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('newVideoCat').value = 'commercial';
+    const btn = document.getElementById('addVideoBtn');
+    btn.textContent = 'Add Video';
+    delete btn.dataset.editIndex;
+  }
+
+  document.getElementById('addVideoBtn').addEventListener('click', () => {
+    const id    = document.getElementById('newVideoId').value.trim();
+    const title = document.getElementById('newVideoTitle').value.trim();
+    const desc  = document.getElementById('newVideoDesc').value.trim();
+    const dur   = document.getElementById('newVideoDur').value.trim();
+    const cat   = document.getElementById('newVideoCat').value;
+    if (!id || !title) { alert('YouTube ID and Title are required.'); return; }
+
+    const editIndex = document.getElementById('addVideoBtn').dataset.editIndex;
+    const entry = { id, title, desc, cat, duration: dur };
+
+    if (editIndex !== undefined) {
+      siteData.videos[parseInt(editIndex)] = entry;
+    } else {
+      siteData.videos.push(entry);
+    }
+    renderVideoList();
+    resetAddForm();
+    document.getElementById('addVideoForm').classList.remove('open');
+    document.getElementById('toggleAddForm').textContent = '+ Add Video';
+    markDirty();
+  });
+
+  // ── TOOLS ──
+  function renderTools() {
+    const editor = document.getElementById('toolsEditor');
+    editor.innerHTML = '';
+    siteData.about.tools.forEach((tool, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'tool-chip';
+      chip.innerHTML = `${tool} <button data-i="${i}">✕</button>`;
+      chip.querySelector('button').addEventListener('click', () => {
+        siteData.about.tools.splice(i, 1);
+        renderTools();
+        markDirty();
+      });
+      editor.appendChild(chip);
+    });
+  }
+  document.getElementById('addToolBtn').addEventListener('click', () => {
+    const val = document.getElementById('newToolInput').value.trim();
+    if (val) { siteData.about.tools.push(val); document.getElementById('newToolInput').value=''; renderTools(); markDirty(); }
+  });
+  document.getElementById('newToolInput').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('addToolBtn').click(); });
+
+  // ── STATS ──
+  function renderStats() {
+    const editor = document.getElementById('statsEditor');
+    editor.innerHTML = '';
+    siteData.about.stats.forEach((s, i) => {
+      const div = document.createElement('div');
+      div.className = 'stat-edit-item';
+      div.innerHTML = `
+        <input type="text" value="${s.num}" placeholder="10+" data-si="${i}" data-field="num"/>
+        <input type="text" value="${s.label}" placeholder="Label" data-si="${i}" data-field="label"/>`;
+      div.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+        siteData.about.stats[parseInt(inp.dataset.si)][inp.dataset.field] = inp.value;
+        markDirty();
+      }));
+      editor.appendChild(div);
+    });
+  }
+  function collectStats() {
+    document.querySelectorAll('#statsEditor input').forEach(inp => {
+      siteData.about.stats[parseInt(inp.dataset.si)][inp.dataset.field] = inp.value;
+    });
+  }
+
+  // ── SOCIALS ──
+  function renderSocials() {
+    const editor = document.getElementById('socialsEditor');
+    editor.innerHTML = '';
+    siteData.contact.socials.forEach((s, i) => {
+      const row = document.createElement('div');
+      row.className = 'social-item';
+      row.innerHTML = `
+        <div class="social-label">${s.label}</div>
+        <input type="url" value="${s.url}" placeholder="https://..." data-si="${i}"/>`;
+      row.querySelector('input').addEventListener('input', e => {
+        siteData.contact.socials[i].url = e.target.value;
+        markDirty();
+      });
+      editor.appendChild(row);
+    });
+  }
+  function collectSocials() {
+    document.querySelectorAll('#socialsEditor input').forEach(inp => {
+      siteData.contact.socials[parseInt(inp.dataset.si)].url = inp.value;
+    });
+  }
+
+  // ── INIT ──
+  checkLogin();
+</script>
+</body>
+</html>
