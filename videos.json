@@ -9,22 +9,52 @@
     "heading": "Telling stories through the edit.",
     "bio1": "Ali Youssef is a Beirut-based video editor with a decade of experience crafting cinematic narratives for brands, directors, and artists across the Middle East and Europe.",
     "bio2": "His approach blends precise rhythm, emotional pacing, and an obsession with color — transforming raw footage into stories that linger.",
-    "tools": ["Premiere Pro", "After Effects", "DaVinci Resolve", "Audition", "Cinema 4D"],
+    "tools": [
+      "Premiere Pro",
+      "After Effects",
+      "DaVinci Resolve",
+      "Audition",
+      "Cinema 4D"
+    ],
     "stats": [
-      { "num": "10+", "label": "Years of experience" },
-      { "num": "80+", "label": "Projects completed" },
-      { "num": "30+", "label": "Brand clients" },
-      { "num": "12", "label": "Awards & nominations" }
+      {
+        "num": "10+",
+        "label": "Years of experience"
+      },
+      {
+        "num": "80+",
+        "label": "Projects completed"
+      },
+      {
+        "num": "30+",
+        "label": "Brand clients"
+      },
+      {
+        "num": "12",
+        "label": "Awards & nominations"
+      }
     ]
   },
   "contact": {
     "email": "ali@aliyoussef.com",
     "location": "Beirut, Lebanon",
     "socials": [
-      { "label": "Instagram", "url": "#" },
-      { "label": "Vimeo", "url": "#" },
-      { "label": "LinkedIn", "url": "#" },
-      { "label": "YouTube", "url": "#" }
+      {
+        "label": "Instagram",
+        "url": "#"
+      },
+      {
+        "label": "Vimeo",
+        "url": "#"
+      },
+      {
+        "label": "LinkedIn",
+        "url": "#"
+      },
+      {
+        "label": "YouTube",
+        "url": "#"
+      }
     ]
   },
   "videos": [
@@ -90,6 +120,13 @@
       "desc": "Motivational brand film for a regional sports apparel launch.",
       "cat": "commercial",
       "duration": "2:10"
+    },
+    {
+      "id": "https://www.youtube.com/watch?v=BkLetr2iL9g",
+      "title": "Iron Man 4",
+      "desc": "iron man 4 trailer 2026",
+      "cat": "commercial",
+      "duration": "1:58"
     }
   ]
 }
