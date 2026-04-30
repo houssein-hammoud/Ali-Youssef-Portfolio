@@ -265,7 +265,7 @@
           <div class="field-row">
             <div class="field">
               <label>YouTube Video ID</label>
-              <input type="text" id="newVideoId" placeholder="e.g. dQw4w9WgXcQ"/>
+              <input type="text" id="newVideoId" placeholder="Paste YouTube URL or video ID"/>
             </div>
             <div class="field">
               <label>Duration</label>
@@ -323,7 +323,7 @@
         </div>
         <div class="field">
           <label>Background Reel — YouTube Video ID</label>
-          <input type="text" id="heroReelId" placeholder="e.g. ZlNFpri-Y40"/>
+          <input type="text" id="heroReelId" placeholder="Paste YouTube URL or video ID"/>
         </div>
         <div id="reelPreview" style="margin-top:0.75rem;font-size:0.7rem;color:var(--muted);"></div>
       </div>
@@ -399,6 +399,27 @@
 </div>
 
 <script>
+  // ── YOUTUBE ID EXTRACTOR ──
+  function extractYouTubeId(input) {
+    input = input.trim();
+    // Already a clean ID (11 chars, no slashes or dots)
+    if (/^[a-zA-Z0-9_-]{11}$/.test(input)) return input;
+    try {
+      const url = new URL(input);
+      // youtu.be/ID
+      if (url.hostname === 'youtu.be') return url.pathname.slice(1).split('?')[0];
+      // youtube.com/watch?v=ID
+      if (url.searchParams.get('v')) return url.searchParams.get('v');
+      // youtube.com/embed/ID
+      if (url.pathname.includes('/embed/')) return url.pathname.split('/embed/')[1].split('?')[0];
+      // youtube.com/shorts/ID
+      if (url.pathname.includes('/shorts/')) return url.pathname.split('/shorts/')[1].split('?')[0];
+    } catch(e) {}
+    // Fallback: grab 11-char alphanumeric sequence
+    const match = input.match(/[a-zA-Z0-9_-]{11}/);
+    return match ? match[0] : input;
+  }
+
   // ── CONFIG ──
   const REPO_OWNER = 'houssein-hammoud';
   const REPO_NAME  = 'Ali-Youssef-Portfolio';
@@ -574,8 +595,17 @@
 
   // ── REEL PREVIEW ──
   document.getElementById('heroReelId').addEventListener('input', e => {
-    updateReelPreview(e.target.value.trim());
+    const id = extractYouTubeId(e.target.value);
+    e.target.value = id;
+    updateReelPreview(id);
     markDirty();
+  });
+  document.getElementById('heroReelId').addEventListener('paste', e => {
+    setTimeout(() => {
+      const id = extractYouTubeId(e.target.value);
+      e.target.value = id;
+      updateReelPreview(id);
+    }, 50);
   });
   function updateReelPreview(id) {
     const el = document.getElementById('reelPreview');
@@ -654,8 +684,16 @@
     delete btn.dataset.editIndex;
   }
 
+  // Auto-extract ID on paste/blur for video ID field
+  document.getElementById('newVideoId').addEventListener('change', e => {
+    e.target.value = extractYouTubeId(e.target.value);
+  });
+  document.getElementById('newVideoId').addEventListener('paste', e => {
+    setTimeout(() => { e.target.value = extractYouTubeId(e.target.value); }, 50);
+  });
+
   document.getElementById('addVideoBtn').addEventListener('click', () => {
-    const id    = document.getElementById('newVideoId').value.trim();
+    const id    = extractYouTubeId(document.getElementById('newVideoId').value);
     const title = document.getElementById('newVideoTitle').value.trim();
     const desc  = document.getElementById('newVideoDesc').value.trim();
     const dur   = document.getElementById('newVideoDur').value.trim();
@@ -750,3 +788,4 @@
 </script>
 </body>
 </html>
+
