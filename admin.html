@@ -240,6 +240,7 @@
     <div class="sidebar-bottom">
       <a class="preview-link" href="index.html" target="_blank">↗ View Live Site</a>
       <br/><br/>
+      <button class="logout-btn" style="margin-bottom:0.5rem;" id="resetTokenBtn">🔑 Reset Token</button>
       <button class="logout-btn" id="logoutBtn">Log Out</button>
     </div>
   </aside>
@@ -430,7 +431,8 @@
 
   // ── STATE ──
   let siteData = null;
-  let githubToken = sessionStorage.getItem('gh_token') || '';
+  // Persist token in localStorage so it survives tab/session closes
+  let githubToken = localStorage.getItem('gh_token') || sessionStorage.getItem('gh_token') || '';
   let dirty = false;
 
   // ── LOGIN ──
@@ -466,6 +468,10 @@
     location.reload();
   });
 
+  document.getElementById('resetTokenBtn').addEventListener('click', () => {
+    openTokenModal();
+  });
+
   // ── GITHUB LOAD ──
   async function loadFromGitHub() {
     try {
@@ -480,30 +486,81 @@
 
   // ── TOKEN MODAL ──
   const tokenModal = document.getElementById('tokenModal');
+
+  function openTokenModal() {
+    document.getElementById('tokenInput').value = githubToken || '';
+    tokenModal.classList.add('open');
+  }
+
   document.getElementById('saveTokenBtn').addEventListener('click', () => {
     const t = document.getElementById('tokenInput').value.trim();
-    if (t) { githubToken = t; sessionStorage.setItem('gh_token', t); tokenModal.classList.remove('open'); saveToGitHub(); }
+    if (t) {
+      githubToken = t;
+      localStorage.setItem('gh_token', t);   // persists across sessions
+      sessionStorage.setItem('gh_token', t);
+      tokenModal.classList.remove('open');
+      collectAllForms(); // must run before saveToGitHub when coming via token modal
+      saveToGitHub();
+    }
   });
   document.getElementById('cancelTokenBtn').addEventListener('click', () => tokenModal.classList.remove('open'));
 
   // ── GITHUB SAVE ──
-  async function saveToGitHub() {
-    if (!githubToken) { tokenModal.classList.add('open'); return; }
-    setStatus('saving', 'Publishing...');
-    try {
-      // Get current SHA
-      const metaRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-        headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' }
-      });
-      const meta = await metaRes.json();
-      const sha = meta.sha;
+  // Safe base64 encoding that handles unicode (replaces the broken btoa+unescape pattern)
+  function toBase64(str) {
+    return btoa(new TextEncoder().encode(str).reduce((s, b) => s + String.fromCharCode(b), ''));
+  }
 
-      const content = btoa(unescape(encodeURIComponent(JSON.stringify(siteData, null, 2))));
-      const putRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
-        method: 'PUT',
-        headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: 'Update site content via admin panel', content, sha, branch: BRANCH })
-      });
+  async function saveToGitHub() {
+    if (!githubToken) { openTokenModal(); return; }
+    setStatus('saving', 'Publishing…');
+    showSaveBar();
+    try {
+      // Step 1: fetch current file SHA (required by GitHub API to update a file)
+      const metaRes = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
+        { headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+
+      if (metaRes.status === 401) {
+        githubToken = '';
+        localStorage.removeItem('gh_token');
+        sessionStorage.removeItem('gh_token');
+        setStatus('error', 'Token invalid or expired — re-enter it');
+        openTokenModal();
+        return;
+      }
+      if (!metaRes.ok) {
+        const err = await metaRes.json();
+        setStatus('error', `GitHub error (${metaRes.status}): ${err.message || 'Could not fetch file'}`);
+        return;
+      }
+
+      const meta = await metaRes.json();
+      if (!meta.sha) {
+        setStatus('error', 'Could not read file SHA from GitHub — check repo/path config');
+        return;
+      }
+
+      // Step 2: commit updated content
+      const content = toBase64(JSON.stringify(siteData, null, 2));
+      const putRes = await fetch(
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `token ${githubToken}`,
+            Accept: 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: 'Update site content via admin panel',
+            content,
+            sha: meta.sha,
+            branch: BRANCH
+          })
+        }
+      );
 
       if (putRes.ok) {
         setStatus('saved', '✓ Published! Live in ~30s');
@@ -511,11 +568,17 @@
         hideSaveBar();
       } else {
         const err = await putRes.json();
-        if (putRes.status === 401) { githubToken = ''; sessionStorage.removeItem('gh_token'); tokenModal.classList.add('open'); }
-        else setStatus('error', 'Error: ' + (err.message || 'Unknown'));
+        if (putRes.status === 401) {
+          githubToken = '';
+          localStorage.removeItem('gh_token');
+          sessionStorage.removeItem('gh_token');
+          openTokenModal();
+        } else {
+          setStatus('error', `Save failed (${putRes.status}): ${err.message || 'Unknown error'}`);
+        }
       }
     } catch(e) {
-      setStatus('error', 'Save failed. Check token & network.');
+      setStatus('error', `Network error: ${e.message}`);
     }
   }
 
