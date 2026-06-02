@@ -3,7 +3,7 @@
     "name": "Ali Youssef",
     "tagline": "Cinematic Video Editor",
     "subtitle": "Crafting visual stories that resonate — from commercial campaigns to narrative films.",
-    "reelVideoId": "ZlNFpri-Y40"
+    "reelVideoId": "Q-WCvztomn4"
   },
   "about": {
     "heading": "Telling stories through the edit.",
@@ -120,13 +120,6 @@
       "desc": "Motivational brand film for a regional sports apparel launch.",
       "cat": "commercial",
       "duration": "2:10"
-    },
-    {
-      "id": "Q-WCvztomn4",
-      "title": "test",
-      "desc": "test",
-      "cat": "narrative",
-      "duration": ""
     }
   ]
 }
