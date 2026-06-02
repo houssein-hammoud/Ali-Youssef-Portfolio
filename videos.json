@@ -115,13 +115,6 @@
       "duration": "9:15"
     },
     {
-      "id": "fJ9rUzIMcZQ",
-      "title": "Rise — Athletic Brand Film",
-      "desc": "Motivational brand film for a regional sports apparel launch.",
-      "cat": "commercial",
-      "duration": "2:10"
-    },
-    {
       "id": "Q-WCvztomn4",
       "title": "test",
       "desc": "test",
@@ -129,11 +122,11 @@
       "duration": ""
     },
     {
-      "id": "nXdNVhzCEpE",
-      "title": "test",
-      "desc": "test",
+      "id": "fJ9rUzIMcZQ",
+      "title": "Rise — Athletic Brand Film",
+      "desc": "Motivational brand film for a regional sports apparel launch.",
       "cat": "commercial",
-      "duration": ""
+      "duration": "2:10"
     }
   ]
 }
